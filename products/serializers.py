@@ -9,5 +9,5 @@ class CompanySerializer(serializers.ModelSerializer):
 class ProductsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Products
-        fields = ['product','sku','price','discount','company_product']
+        fields = ['product','sku','price','discount','company']
     
