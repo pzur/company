@@ -2,6 +2,7 @@ from rest_framework import generics
 from django.contrib.auth.models import User
 import json
 from django.http import HttpResponse
+from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.contrib.auth import authenticate
 from .serializers import CompanySerializer, ProductsSerializer
@@ -11,6 +12,7 @@ from .models import Company, Products
 from rest_framework.authtoken.models import Token
 from rest_framework import permissions
 from rest_framework import parsers
+from rest_framework import status
 
 
 # Vistas Basadas en Clases Controlando todo el Modelo de Usuarios
@@ -44,7 +46,6 @@ class LoginView(APIView):
         password = request.data["password"]
         user = authenticate(username=username, password=password)
         if user:
-            
             token = Token.objects.get(user_id=user.id)
             data = {"nombre": user.username,
                     "email": user.email,
@@ -53,6 +54,15 @@ class LoginView(APIView):
             data = {"error": "No Son las Credenciales"}
         response = json.dumps(data)
         return HttpResponse(response, content_type='application/json')
+
+class LogoutView(APIView):
+    permission_classes = (permissions.AllowAny,)
+    parser_classes = (parsers.JSONParser,)
+    def post(self, request, format=None):
+        request.user.auth_token.delete()
+        return Response(status=status.HTTP_200_OK)
+
+
 
 
 class ProductsListView(generics.ListAPIView):
