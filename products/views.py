@@ -5,7 +5,7 @@ from django.http import HttpResponse
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.contrib.auth import authenticate
-from .serializers import CompanySerializer, ProductsSerializer
+from .serializers import CompanySerializer, ProductsSerializer, UserSerializer
 from rest_framework.permissions import AllowAny
 from .models import Company, Products
 
@@ -46,10 +46,13 @@ class LoginView(APIView):
         password = request.data["password"]
         user = authenticate(username=username, password=password)
         if user:
-            token = Token.objects.get(user_id=user.id)
-            data = {"nombre": user.username,
-                    "email": user.email,
-                    "token": token.key}
+            if Token.objects.get_or_create(user_id=user.id):
+                token = Token.objects.get(user_id=user.id)
+                data = {"nombre": user.username,
+                        "email": user.email,
+                        "token": token.key}
+            else:
+                token = Token.objects.create(user=user)
         else:
             data = {"error": "No Son las Credenciales"}
         response = json.dumps(data)
@@ -60,9 +63,16 @@ class LogoutView(APIView):
     parser_classes = (parsers.JSONParser,)
     def post(self, request, format=None):
         request.user.auth_token.delete()
-        return Response(status=status.HTTP_200_OK)
+        data = {"usuario":"Salida de usuario"}
+        response = json.dumps(data)
+        return HttpResponse(response, status=status.HTTP_200_OK)
 
 
+
+class UserListView(generics.ListAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = (AllowAny,)
 
 
 class ProductsListView(generics.ListAPIView):
