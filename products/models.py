@@ -1,7 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
 
-
 class Company(models.Model):
      company = models.CharField(max_length=30, unique=True)
      ruc =models.IntegerField()
@@ -10,7 +9,6 @@ class Company(models.Model):
 
      def __str__(self):
          return self.company
-
 
 class Products (models.Model):
     product = models.CharField(max_length=30)

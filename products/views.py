@@ -1,4 +1,3 @@
-from rest_framework import generics
 from django.contrib.auth.models import User
 import json
 from django.http import HttpResponse
@@ -8,12 +7,8 @@ from django.contrib.auth import authenticate
 from .serializers import CompanySerializer, ProductsSerializer, UserSerializer
 from rest_framework.permissions import AllowAny
 from .models import Company, Products
-
 from rest_framework.authtoken.models import Token
-from rest_framework import permissions
-from rest_framework import parsers
-from rest_framework import status
-
+from rest_framework import permissions, parsers, status, generics
 
 # Vistas Basadas en Clases Controlando todo el Modelo de Usuarios
 
@@ -32,10 +27,8 @@ class RegisterUsers(generics.CreateAPIView):  # Solo Registrar datos en el model
         # generando el token para ese usuario se refiere a la tabla auth_token
         token = Token.objects.create(user=user)
         data = {'detail': 'User created with token:' + token.key}
-
         response = json.dumps(data)
         return HttpResponse(response, content_type='application/json')
-
 
 class LoginView(APIView):
     permission_classes = (permissions.AllowAny,)
@@ -67,19 +60,15 @@ class LogoutView(APIView):
         response = json.dumps(data)
         return HttpResponse(response, status=status.HTTP_200_OK)
 
-
-
 class UserListView(generics.ListAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = (AllowAny,)
 
-
 class ProductsListView(generics.ListAPIView):
     queryset = Products.objects.all()
     serializer_class = ProductsSerializer
     permission_classes = (AllowAny,)
-
 
 class CompanyAllView(generics.ListAPIView):
     queryset = Company.objects.all()
