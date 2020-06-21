@@ -20,15 +20,21 @@ class RegisterUsers(generics.CreateAPIView):  # Solo Registrar datos en el model
         # Creando en Nuevo Usuario
         username = request.data['username']
         email = request.data['email']
-        password = request.data['password']
-        user = User.objects.create_user(username, email, password)
-        user.save()
+        password1 = request.data['password']
+        password2 = request.data['confirmar_password']
+        if password1 == password2:
+            user = User.objects.create_user(username, email, password1)
+            user.save()
+            # generando el token para ese usuario se refiere a la tabla auth_token
+            token = Token.objects.create(user=user)
+            data = {'detail': 'User created with token:' + token.key}
+            response = json.dumps(data)
+            return HttpResponse(response, content_type='application/json')
+        else:
+            data = {'detail': 'No coincide los password'}
+            response = json.dumps(data)
+            return HttpResponse(response, content_type='application/json')
 
-        # generando el token para ese usuario se refiere a la tabla auth_token
-        token = Token.objects.create(user=user)
-        data = {'detail': 'User created with token:' + token.key}
-        response = json.dumps(data)
-        return HttpResponse(response, content_type='application/json')
 
 class LoginView(APIView):
     permission_classes = (permissions.AllowAny,)
@@ -36,16 +42,13 @@ class LoginView(APIView):
 
     def post(self, request, format=None):
         username = request.data["username"]
-        password = request.data["password"]
-        user = authenticate(username=username, password=password)
+        password1 = request.data["password"]
+        user = authenticate(username=username, password=password1)
         if user:
-            if Token.objects.get_or_create(user_id=user.id):
-                token = Token.objects.get(user_id=user.id)
+                token = Token.objects.get_or_create(user_id=user.id)
                 data = {"nombre": user.username,
                         "email": user.email,
                         "token": token.key}
-            else:
-                token = Token.objects.create(user=user)
         else:
             data = {"error": "No Son las Credenciales"}
         response = json.dumps(data)
