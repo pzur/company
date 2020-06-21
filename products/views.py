@@ -8,7 +8,7 @@ from .serializers import CompanySerializer, ProductsSerializer, UserSerializer
 from rest_framework.permissions import AllowAny
 from .models import Company, Products
 from rest_framework.authtoken.models import Token
-from rest_framework import permissions, parsers, status, generics
+from rest_framework import permissions, parsers, status, generics, viewsets
 
 # Vistas Basadas en Clases Controlando todo el Modelo de Usuarios
 
@@ -34,7 +34,6 @@ class RegisterUsers(generics.CreateAPIView):  # Solo Registrar datos en el model
             data = {'detail': 'No coincide los password'}
             response = json.dumps(data)
             return HttpResponse(response, content_type='application/json')
-
 
 class LoginView(APIView):
     permission_classes = (permissions.AllowAny,)
@@ -68,13 +67,13 @@ class UserListView(generics.ListAPIView):
     serializer_class = UserSerializer
     permission_classes = (AllowAny,)
 
-class ProductsListView(generics.ListAPIView):
-    queryset = Products.objects.all()
-    serializer_class = ProductsSerializer
-    permission_classes = (AllowAny,)
-
 class CompanyAllView(generics.ListAPIView):
     queryset = Company.objects.all()
     serializer_class = CompanySerializer
+    permission_classes = (AllowAny,)
+
+class ProductsCreat(viewsets.ModelViewSet):
+    queryset = Products.objects.all()
+    serializer_class = ProductsSerializer
     permission_classes = (AllowAny,)
 
